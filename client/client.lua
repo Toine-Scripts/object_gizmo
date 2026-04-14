@@ -3,9 +3,31 @@ local gizmoHasCursor = true
 local currentMinRadius = 2.0
 local currentMaxRadius = 7.0
 
+local zUI = nil
+local anyIsOpen = false
+
+if Gizmo.Config.zUIFix then
+    if Utils.IsResourceStarted(Gizmo.Config.ressourceName) then
+        zUI = exports[Gizmo.Config.ressourceName]:getObject()
+    end
+end
+
 local function toggleNuiFrame(bool)
     usingGizmo = bool
     gizmoHasCursor = bool -- Reset to true when opening
+    if Gizmo.Config.zUIFix and zUI and zUI.IsAnyMenuOpen then
+        if bool then
+            anyIsOpen = zUI.IsAnyMenuOpen()
+            if anyIsOpen and zUI.ManageFocus then
+                zUI.ManageFocus(false)
+            end
+        else
+            if anyIsOpen and zUI.ManageFocus then
+                zUI.ManageFocus(true)
+            end
+        end
+    end
+
     SetNuiFocus(bool, bool)
     --SetNuiFocusKeepInput(bool)
 end
@@ -162,6 +184,7 @@ end)
 RegisterNUICallback('toggleCamera', function(data, cb)
     gizmoHasCursor = not gizmoHasCursor
     SetNuiFocus(true, gizmoHasCursor)
+    SetNuiFocusKeepInput(not gizmoHasCursor)
     cb('ok')
 end)
 

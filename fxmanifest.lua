@@ -14,8 +14,9 @@ client_scripts {
 }
 
 shared_scripts {
+    'config.lua',
     '@ox_lib/init.lua',
-    '@ts-lib/imports.lua',
+    '@ts-lib/import.lua',
 }
 
 files {
