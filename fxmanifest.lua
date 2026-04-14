@@ -3,7 +3,7 @@ game 'gta5'
 lua54 'yes'
 
 description 'NUI Version of object gizmo maintained by Toine Scripts'
-version '1.0.0'
+version '1.0.1'
 author 'Toine, DemiAutomatic (Original)'
 
 ui_page 'web/dist/index.html'
