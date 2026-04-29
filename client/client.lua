@@ -6,23 +6,25 @@ local currentMaxRadius = 7.0
 local zUI = nil
 local anyIsOpen = false
 
-if Gizmo.Config.zUIFix then
-    if Utils.IsResourceStarted(Gizmo.Config.ressourceName) then
-        zUI = exports[Gizmo.Config.ressourceName]:getObject()
+AddEventHandler('onResourceStart', function(resourceName)
+    if resourceName ~= Gizmo.Config.ressourceName then
+        if Utils.IsResourceStarted(Gizmo.Config.ressourceName) then
+            zUI = exports[Gizmo.Config.ressourceName]:getObject()
+        end
     end
-end
+end)
 
 local function toggleNuiFrame(bool)
     usingGizmo = bool
     gizmoHasCursor = bool -- Reset to true when opening
-    if Gizmo.Config.zUIFix and zUI and zUI.IsAnyMenuOpen then
+    if zUI and zUI.IsAnyMenuOpen then
         if bool then
             anyIsOpen = zUI.IsAnyMenuOpen()
-            if anyIsOpen and zUI.ManageFocus then
+            if anyIsOpen then
                 zUI.ManageFocus(false)
             end
         else
-            if anyIsOpen and zUI.ManageFocus then
+            if anyIsOpen then
                 zUI.ManageFocus(true)
             end
         end
@@ -35,7 +37,7 @@ end
 function useGizmo(handle)
     local isObject = IsEntityAnObject(handle)
     local rotation
-    
+
     if isObject then
         rotation = GetEntityRotation(handle)
     else
@@ -43,7 +45,7 @@ function useGizmo(handle)
         local heading = GetEntityHeading(handle)
         rotation = vector3(0.0, 0.0, heading)
     end
-    
+
     SendNUIMessage({
         action = 'setGizmoEntity',
         data = {
@@ -55,7 +57,7 @@ function useGizmo(handle)
     })
 
     toggleNuiFrame(true)
-    
+
     if isObject then
         SetEntityCollision(handle, false, false)
     end
@@ -63,7 +65,7 @@ function useGizmo(handle)
     local function updateTextUI(mode, space)
         local displayMode = mode == "Translate" and "Translation" or "Rotation"
         local displaySpace = space == "local" and "Relative" or "World"
-        
+
         local text = ([[
             Current Mode:<i> %s - %s</i><br>
             <letter>W</letter> Translation Mode<br>
@@ -72,7 +74,7 @@ function useGizmo(handle)
             <letter>LAlt</letter> Snap to Ground<br>
             <letter>Enter</letter> Finish Editing
         ]]):format(displayMode, displaySpace)
-        
+
         exports['ts-lib']:SendTextUI(text, 'top-right')
     end
 
@@ -132,7 +134,7 @@ RegisterNUICallback('moveEntity', function(data, cb)
     local isObject = data.isObject
 
     SetEntityCoords(entity, position.x, position.y, position.z)
-    
+
     if isObject then
         -- Pour les objects, utiliser SetEntityRotation
         SetEntityRotation(entity, rotation.x, rotation.y, rotation.z)
@@ -140,7 +142,7 @@ RegisterNUICallback('moveEntity', function(data, cb)
         -- Pour les peds, utiliser uniquement SetEntityHeading (rotation Z only)
         SetEntityHeading(entity, rotation.z)
     end
-    
+
     cb('ok')
 end)
 
